@@ -17,9 +17,6 @@
       // ros
       const ros = new ROSLIB.Ros();
 
-      // image tab
-      const img = document.createElement("img");
-
       // odemetry dataType
       var twist = {
           linear : {x:0.0, y:0.0, z:0.0},
@@ -32,10 +29,11 @@
           name : '/cmd_vel',
           messageType : 'geometry_msgs/Twist',
       });
+
       const image_topic = new ROSLIB.Topic({
           ros : ros,
-          name : '/rgb_cam/image_raw',
-          messageType : 'sensor_msgs/Image',
+          name : '/jpg_uri',
+          messageType : 'std_msgs/msg/String',
       });
 
 
@@ -47,33 +45,12 @@
     // functions
       function test_connect(){
 
-        console.log('test_connect called');
-
         // connect
         ros.connect('ws:127.0.0.1:9090');
-
+        
         // image subscriber callback function
         image_topic.subscribe((imgMes)=>{
-
-          const can = document.getElementById("canvas_camera");
-
-          can.width = imgMes.width;
-          can.height = imgMes.height;
-
-          const ctx = can.getContext("2d");
-
-          const imgData = ctx.createImageData(imgMes.width, imgMes.height);
-          const data = imgData.data;
-          const inData = Uint8Array.from(imgMes.data);
-          
-          var j = 0, i = 4;
-          while( j < inData.length) {
-            data[i++] = inData[j++]; // red
-            data[i++] = inData[j++]; // green
-            data[i++] = inData[j++]; // blue
-            data[i++] = 255;  // alpha
-          }
-          ctx.putImageData(imgData, 0, 0);
+          document.getElementById('test_img').src=imgMes.data;
         });
 
       }
@@ -96,19 +73,18 @@
         geometry_topic.publish(twist);
       }
       
-
     </script>
   </head>
 
   <body>
 
     <div>
-      <canvas id="canvas_camera"></canvas>
+      <img alt="" src="" id="test_img">
     </div>
     <div>
       time:<%= time %><br>
       data:<%= data %><br>
-    
+      
       <button type="button" class="btn btn-primary" onclick="test_connect()">Connect</button>
       <button type="button" class="btn btn-primary" onclick="publish_foward()">Foward</button>
       <button type="button" class="btn btn-primary" onclick="publish_back()">Back</button>
@@ -118,4 +94,3 @@
   </body>
 
 </html>
-
